@@ -12,44 +12,53 @@
     <header class="hero">
       <p class="eyebrow">A little game. A big mission.</p>
       <h1>💧 Water Quest</h1>
-      <p class="game-instructions">
-        Catch 20 yellow water cans in 30 seconds.
-        Avoid the red pollution drops!
-      </p>
+      <p>Collect 20 yellow water cans before time runs out. Avoid red pollution drops!</p>
     </header>
+
+    <section class="mission">
+      <strong>Why it matters</strong>
+      <p>Access to clean water changes lives. Play, learn, and help spread the word about the global water crisis.</p>
+    </section>
+
+    <section class="settings">
+      <label for="difficulty">Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy — 45 seconds</option>
+        <option value="normal" selected>Normal — 30 seconds</option>
+        <option value="hard">Hard — 20 seconds</option>
+      </select>
+    </section>
 
     <section class="stats">
       <div class="stat">
-        <span class="stat-label">Cans collected</span>
+        <span>Cans collected</span>
         <strong id="current-cans">0</strong>
-        <span class="stat-sub">of 20</span>
+        <small>of 20</small>
       </div>
       <div class="stat">
-        <span class="stat-label">Time left</span>
+        <span>Time left</span>
         <strong><span id="timer">30</span>s</strong>
-        <span class="stat-sub">Make every second count</span>
+        <small>Make every second count</small>
       </div>
       <div class="stat">
-        <span class="stat-label">Best score</span>
+        <span>Best score</span>
         <strong id="best-score">0</strong>
-        <span class="stat-sub">This session</span>
+        <small>This session</small>
       </div>
     </section>
 
-    <div
-      class="progress-track"
+    <div class="progress-track"
       id="progress-track"
       role="progressbar"
       aria-label="Collection progress"
       aria-valuemin="0"
       aria-valuemax="20"
-      aria-valuenow="0"
-    >
+      aria-valuenow="0">
       <div class="progress-fill" id="progress-fill"></div>
     </div>
 
     <p id="achievements" class="achievement" role="status" aria-live="polite">
-      Ready? Press Start Game to begin!
+      Choose a difficulty and press Start Game!
     </p>
 
     <section class="game-grid" aria-label="Game board"></section>
@@ -60,19 +69,32 @@
     </div>
 
     <p class="legend">
-      <span class="legend-can">●</span> Yellow can: +1 point
-      <span class="legend-obstacle">●</span> Red drop: −2 points
+      🟡 Yellow can: +1 point
+      🔴 Red pollution: −2 points
     </p>
 
-    <p class="footer-note">
-      Every drop counts. Learn about the real-world water access mission at
-      <a href="https://www.charitywater.org/" target="_blank" rel="noreferrer">
-        charity: water
-      </a>.
-    </p>
+    <section class="impact">
+      <h2>Be part of the solution</h2>
+      <p>Clean water can improve health, education, and opportunity. Learn about the mission and how to support it.</p>
+
+      <a href="https://www.charitywater.org/"
+         target="_blank" rel="noopener noreferrer">
+        Visit charity: water
+      </a>
+
+      <a href="https://www.charitywater.org/donate"
+         target="_blank" rel="noopener noreferrer">
+        Support clean water
+      </a>
+    </section>
+
+    <footer>
+      Water Quest is a student-created educational game inspired by charity: water. It is not an official charity: water product.
+    </footer>
   </main>
 
   <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
