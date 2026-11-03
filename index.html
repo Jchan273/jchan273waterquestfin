@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Water Quest</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">A little game. A big mission.</p>
+      <h1>💧 Water Quest</h1>
+      <p class="game-instructions">
+        Catch 20 yellow water cans in 30 seconds.
+        Avoid the red pollution drops!
+      </p>
+    </header>
+
+    <section class="stats">
+      <div class="stat">
+        <span class="stat-label">Cans collected</span>
+        <strong id="current-cans">0</strong>
+        <span class="stat-sub">of 20</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Time left</span>
+        <strong><span id="timer">30</span>s</strong>
+        <span class="stat-sub">Make every second count</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Best score</span>
+        <strong id="best-score">0</strong>
+        <span class="stat-sub">This session</span>
+      </div>
+    </section>
+
+    <div
+      class="progress-track"
+      id="progress-track"
+      role="progressbar"
+      aria-label="Collection progress"
+      aria-valuemin="0"
+      aria-valuemax="20"
+      aria-valuenow="0"
+    >
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <p id="achievements" class="achievement" role="status" aria-live="polite">
+      Ready? Press Start Game to begin!
+    </p>
+
+    <section class="game-grid" aria-label="Game board"></section>
+
+    <div class="controls">
+      <button id="start-game" class="primary-button">Start Game</button>
+      <button id="reset-game" class="secondary-button">Reset</button>
+    </div>
+
+    <p class="legend">
+      <span class="legend-can">●</span> Yellow can: +1 point
+      <span class="legend-obstacle">●</span> Red drop: −2 points
+    </p>
+
+    <p class="footer-note">
+      Every drop counts. Learn about the real-world water access mission at
+      <a href="https://www.charitywater.org/" target="_blank" rel="noreferrer">
+        charity: water
+      </a>.
+    </p>
+  </main>
+
+  <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+  <script src="script.js"></script>
+</body>
+</html>
