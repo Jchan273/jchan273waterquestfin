@@ -1,5 +1,4 @@
 
-/* charity: water-inspired brand colors */
 :root {
   --yellow: #ffc907;
   --blue: #2e9df7;
@@ -23,17 +22,25 @@ body {
   padding: 24px 16px;
   background: var(--background);
   color: var(--ink);
-  font-family: Avenir, "Proxima Nova", Arial, sans-serif;
+
+  font-family:
+    Avenir,
+    "Proxima Nova",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
 }
 
 .container {
   width: min(100%, 760px);
   margin: 16px auto;
   padding: clamp(20px, 5vw, 42px);
+
   background: var(--paper);
   border: 1px solid #e6edf2;
   border-radius: 22px;
-  box-shadow: 0 12px 36px rgba(28, 60, 82, 0.09);
+
+  box-shadow: 0 12px 36px rgba(28, 60, 82, .09);
 }
 
 .hero {
@@ -43,25 +50,74 @@ body {
 .eyebrow {
   margin: 0 0 8px;
   color: #486477;
-  font-size: 0.78rem;
+  font-size: .78rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
 
 h1 {
   margin: 0;
   font-size: clamp(2rem, 6vw, 3.1rem);
-  letter-spacing: -0.04em;
+  letter-spacing: -.04em;
   line-height: 1.1;
 }
 
-.game-instructions {
-  max-width: 500px;
-  margin: 14px auto 26px;
+.hero > p:last-child {
+  max-width: 520px;
+  margin: 14px auto 22px;
   color: var(--muted);
-  font-size: clamp(0.98rem, 2.5vw, 1.1rem);
+  font-size: 1.05rem;
   line-height: 1.55;
+}
+
+.mission {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border-left: 5px solid var(--yellow);
+  border-radius: 10px;
+  background: #fff9df;
+  line-height: 1.5;
+}
+
+.mission strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.mission p {
+  margin: 0;
+  color: #594a16;
+  font-size: .92rem;
+}
+
+.settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.settings label {
+  font-weight: 800;
+  font-size: .92rem;
+}
+
+.settings select {
+  min-height: 42px;
+  padding: 8px 34px 8px 12px;
+  border: 1px solid #cbd8e0;
+  border-radius: 9px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+}
+
+.settings select:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .stats {
@@ -84,9 +140,9 @@ h1 {
   text-align: center;
 }
 
-.stat-label {
+.stat span {
   color: #4c5c67;
-  font-size: 0.8rem;
+  font-size: .8rem;
   font-weight: 700;
 }
 
@@ -96,9 +152,9 @@ h1 {
   line-height: 1.2;
 }
 
-.stat-sub {
+.stat small {
   color: #74818a;
-  font-size: 0.7rem;
+  font-size: .7rem;
 }
 
 .progress-track {
@@ -113,7 +169,7 @@ h1 {
   height: 100%;
   border-radius: inherit;
   background: var(--yellow);
-  transition: width 0.2s ease;
+  transition: width .2s ease;
 }
 
 .achievement {
@@ -127,7 +183,7 @@ h1 {
   background: #fff9df;
   color: #554300;
   text-align: center;
-  font-size: 0.93rem;
+  font-size: .93rem;
   font-weight: 700;
 }
 
@@ -157,12 +213,15 @@ h1 {
   aspect-ratio: 1;
   padding: 0;
   overflow: hidden;
+
   border: 2px solid transparent;
   border-radius: 16px;
   background: #edf3f6;
+
   cursor: pointer;
   touch-action: manipulation;
-  transition: background 0.15s, transform 0.15s;
+
+  transition: background .15s, transform .15s;
 }
 
 .grid-cell:focus-visible {
@@ -184,27 +243,27 @@ h1 {
   border-color: #ffd1c7;
 }
 
-.grid-cell.hit {
-  transform: scale(0.96);
-}
-
-/* Draw a water can using CSS — no image file required */
 .target {
   position: relative;
   display: block;
   width: 58%;
   height: 58%;
-  animation: popUp 0.22s ease-out;
+  animation: popUp .22s ease-out;
 }
 
+/* CSS-drawn yellow water can */
 .water-can {
   width: 54%;
   height: 66%;
   margin-top: 12%;
+
   border: 3px solid #bd8b00;
   border-radius: 8px 8px 12px 12px;
+
   background: var(--yellow);
-  box-shadow: inset -7px -2px 0 rgba(180, 126, 0, 0.12);
+
+  box-shadow:
+    inset -7px -2px 0 rgba(180, 126, 0, .12);
 }
 
 .water-can::before {
@@ -212,11 +271,14 @@ h1 {
   position: absolute;
   top: 0;
   left: 15%;
+
   width: 43%;
   height: 18%;
+
   border: 3px solid #bd8b00;
   border-bottom: 0;
   border-radius: 6px 6px 0 0;
+
   transform: translateY(-70%);
 }
 
@@ -225,25 +287,34 @@ h1 {
   position: absolute;
   top: 15%;
   right: -20%;
+
   width: 30%;
   height: 22%;
+
   border: 3px solid #bd8b00;
   border-left: 0;
   border-radius: 0 7px 7px 0;
 }
 
+/* Red pollution obstacle */
 .obstacle {
   display: grid;
   place-items: center;
+
   width: 58%;
   height: 62%;
+
   border-radius: 55% 55% 60% 12%;
   background: var(--red);
   color: white;
+
   font-size: clamp(1.2rem, 4vw, 2rem);
   font-weight: 900;
+
   transform: rotate(-45deg);
-  box-shadow: inset -5px -5px 0 rgba(120, 0, 0, 0.12);
+
+  box-shadow:
+    inset -5px -5px 0 rgba(120, 0, 0, .12);
 }
 
 .controls {
@@ -260,10 +331,13 @@ button.secondary-button {
   padding: 12px 24px;
   border: 0;
   border-radius: 10px;
+
   font: inherit;
   font-weight: 800;
+
   cursor: pointer;
-  transition: transform 0.15s, filter 0.15s;
+
+  transition: transform .15s, filter .15s;
 }
 
 button.primary-button {
@@ -278,49 +352,70 @@ button.secondary-button {
 
 button.primary-button:hover,
 button.secondary-button:hover {
-  filter: brightness(0.97);
+  filter: brightness(.97);
   transform: translateY(-1px);
 }
 
 button:disabled {
-  opacity: 0.65;
+  opacity: .65;
   cursor: not-allowed;
 }
 
 .legend {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 7px 9px;
-  flex-wrap: wrap;
   margin: 18px 0 0;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: .82rem;
+  text-align: center;
 }
 
-.legend-can {
-  color: #e4ae00;
+/* Charity: water mission links */
+.impact {
+  margin-top: 28px;
+  padding: 22px;
+  border-radius: 14px;
+  background: #eaf5fc;
+  text-align: center;
 }
 
-.legend-obstacle {
-  margin-left: 8px;
-  color: var(--red);
+.impact h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
 }
 
-.footer-note {
-  margin: 22px 0 0;
+.impact p {
+  max-width: 530px;
+  margin: 0 auto 16px;
+  color: #455c6c;
+  line-height: 1.5;
+}
+
+.impact a {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 15px;
+
+  border-radius: 8px;
+  background: var(--blue);
+  color: #082d49;
+
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.impact a:last-child {
+  background: var(--yellow);
+  color: #3c3100;
+}
+
+footer {
+  margin: 20px 0 0;
   color: #687681;
-  font-size: 0.8rem;
+  font-size: .78rem;
   line-height: 1.5;
   text-align: center;
 }
 
-a {
-  color: #176ca5;
-  font-weight: 700;
-}
-
-/* Victory confetti */
+/* Confetti celebration */
 .confetti-layer {
   position: fixed;
   inset: 0;
@@ -332,17 +427,21 @@ a {
 .confetti {
   position: absolute;
   top: -18px;
+
   width: 9px;
   height: 14px;
+
   border-radius: 2px;
+
   animation: fall 2.6s ease-in forwards;
 }
 
 @keyframes popUp {
   from {
     opacity: 0;
-    transform: scale(0.45);
+    transform: scale(.45);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -351,12 +450,14 @@ a {
 
 @keyframes fall {
   to {
-    transform: translate3d(var(--drift), 110vh, 0) rotate(720deg);
-    opacity: 0.85;
+    transform:
+      translate3d(var(--drift), 110vh, 0)
+      rotate(720deg);
+    opacity: .85;
   }
 }
 
-/* Mobile layout */
+/* Mobile responsiveness */
 @media (max-width: 480px) {
   body {
     padding: 10px;
@@ -372,12 +473,12 @@ a {
     padding: 11px 4px;
   }
 
-  .stat-label {
-    font-size: 0.7rem;
+  .stat span {
+    font-size: .7rem;
   }
 
-  .stat-sub {
-    font-size: 0.62rem;
+  .stat small {
+    font-size: .62rem;
   }
 
   .grid-cell {
@@ -391,14 +492,14 @@ a {
   }
 }
 
-/* Respect reduced-motion preferences */
+/* Accessibility: respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
 }
