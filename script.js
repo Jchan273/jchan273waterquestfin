@@ -1,241 +1,438 @@
 
-// Water Quest game configuration
-const GOAL_CANS = 20;
-const GAME_LENGTH = 30;
-const CELL_COUNT = 9;
-const OBSTACLE_CHANCE = 0.22;
+// Water Quest — Project 6
 
-let currentCans = 0;
-let timeLeft = GAME_LENGTH;
-let gameActive = false;
-let countdownInterval = null;
-let spawnInterval = null;
-let bestScore = 0;
+const GOAL = 20;
 
+const MODES = {
+  easy: {
+    time: 60,
+    speed: 1050,
+    danger: 0.12
+  },
+  normal: {
+    time: 45,
+    speed: 850,
+    danger: 0.22
+  },
+  hard: {
+    time: 30,
+    speed: 600,
+    danger: 0.32
+  }
+};
+
+// Milestone messages
+const MILESTONES = [
+  {
+    score: 5,
+    message: "5 cans collected — great start! Keep making a splash!"
+  },
+  {
+    score: 10,
+    message: "Halfway there! 10 cans collected. Every drop counts!"
+  },
+  {
+    score: 15,
+    message: "15 cans! You're almost a Water Quest champion!"
+  },
+  {
+    score: 20,
+    message: "Amazing! You reached 20 cans and completed the quest!"
+  }
+];
+
+let score = 0;
+let timeLeft = 30;
+let best = 0;
+let active = false;
+
+let countdown = null;
+let spawner = null;
+let lastMilestone = 0;
+let audio = null;
+
+// HTML elements
 const grid = document.querySelector(".game-grid");
-const scoreDisplay = document.getElementById("current-cans");
-const timerDisplay = document.getElementById("timer");
-const bestDisplay = document.getElementById("best-score");
-const message = document.getElementById("achievements");
-const startButton = document.getElementById("start-game");
-const resetButton = document.getElementById("reset-game");
-const progressTrack = document.getElementById("progress-track");
-const progressFill = document.getElementById("progress-fill");
-const confettiLayer = document.getElementById("confetti-layer");
 
-// Build the 3x3 game board
+const scoreEl = document.getElementById("current-cans");
+const timerEl = document.getElementById("timer");
+const bestEl = document.getElementById("best-score");
+
+const message = document.getElementById("achievements");
+
+const startBtn = document.getElementById("start-game");
+const resetBtn = document.getElementById("reset-game");
+
+const difficulty = document.getElementById("difficulty");
+
+const progress = document.getElementById("progress-fill");
+const progressTrack = document.getElementById("progress-track");
+
+const confetti = document.getElementById("confetti-layer");
+
+// Get selected difficulty
+function settings() {
+  return MODES[difficulty.value] || MODES.normal;
+}
+
+// Create the 3x3 game grid
 function createGrid() {
   grid.innerHTML = "";
 
-  for (let i = 0; i < CELL_COUNT; i++) {
+  for (let i = 0; i < 9; i++) {
     const cell = document.createElement("button");
 
     cell.type = "button";
     cell.className = "grid-cell";
+    cell.disabled = true;
+
     cell.setAttribute("aria-label", `Empty cell ${i + 1}`);
 
-    cell.addEventListener("click", () => handleCellClick(cell));
+    cell.addEventListener("click", () => collect(cell));
 
     grid.appendChild(cell);
   }
 }
 
-// Update score, timer, best score, and progress bar
-function updateStats() {
-  scoreDisplay.textContent = currentCans;
-  timerDisplay.textContent = timeLeft;
-  bestDisplay.textContent = bestScore;
+// Update score, timer, and progress
+function update() {
+  scoreEl.textContent = score;
+  timerEl.textContent = timeLeft;
+  bestEl.textContent = best;
 
-  progressFill.style.width =
-    `${Math.min(100, (currentCans / GOAL_CANS) * 100)}%`;
+  progress.style.width =
+    `${Math.min(100, score / GOAL * 100)}%`;
 
-  progressTrack.setAttribute("aria-valuenow", currentCans);
+  progressTrack.setAttribute("aria-valuenow", score);
 }
 
-// Display game feedback
-function showMessage(text, kind = "") {
+// Display feedback messages
+function say(text, kind = "") {
   message.textContent = text;
   message.className = `achievement ${kind}`.trim();
 }
 
-// Clear all targets from the board
+// Clear targets from the board
 function clearTargets() {
   grid.querySelectorAll(".grid-cell").forEach(cell => {
     cell.replaceChildren();
-    cell.classList.remove("has-can", "has-obstacle", "hit");
+
+    cell.classList.remove(
+      "has-can",
+      "has-obstacle"
+    );
+
+    cell.disabled = !active;
     cell.setAttribute("aria-label", "Empty game cell");
-    cell.disabled = !gameActive;
   });
 }
 
-// Spawn a random water can or pollution obstacle
-function spawnTarget() {
-  if (!gameActive) return;
+// Sound effects using JavaScript Web Audio
+function sound(kind) {
+  try {
+    const Ctx =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+    if (!Ctx) return;
+
+    if (!audio) audio = new Ctx();
+
+    if (audio.state === "suspended") {
+      audio.resume();
+    }
+
+    const tones = {
+      collect: [720, 1050, 0.12, "sine"],
+      obstacle: [190, 110, 0.2, "sawtooth"],
+      win: [520, 1040, 0.42, "triangle"],
+      button: [420, 520, 0.07, "sine"]
+    };
+
+    const [from, to, duration, wave] =
+      tones[kind] || tones.button;
+
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+
+    const now = audio.currentTime;
+
+    osc.type = wave;
+
+    osc.frequency.setValueAtTime(from, now);
+
+    osc.frequency.exponentialRampToValueAtTime(
+      to,
+      now + duration
+    );
+
+    gain.gain.setValueAtTime(0.0001, now);
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.12,
+      now + 0.015
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      now + duration
+    );
+
+    osc.connect(gain);
+    gain.connect(audio.destination);
+
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+
+  } catch (e) {
+    // Game continues if sound is unavailable.
+  }
+}
+
+// Spawn a water can or pollution obstacle
+function spawn() {
+  if (!active) return;
 
   clearTargets();
 
-  const cells = [...grid.querySelectorAll(".grid-cell")];
-  const cell = cells[Math.floor(Math.random() * cells.length)];
-  const isObstacle = Math.random() < OBSTACLE_CHANCE;
+  const cells = [
+    ...grid.querySelectorAll(".grid-cell")
+  ];
+
+  const cell =
+    cells[Math.floor(Math.random() * cells.length)];
+
+  const obstacle =
+    Math.random() < settings().danger;
 
   const target = document.createElement("span");
 
-  if (isObstacle) {
+  target.setAttribute("aria-hidden", "true");
+
+  if (obstacle) {
     target.className = "target obstacle";
     target.textContent = "!";
+
     cell.classList.add("has-obstacle");
+
     cell.setAttribute(
       "aria-label",
       "Pollution obstacle: lose 2 points"
     );
+
   } else {
     target.className = "target water-can";
+
     cell.classList.add("has-can");
+
     cell.setAttribute(
       "aria-label",
       "Yellow water can: collect 1 point"
     );
   }
 
-  target.setAttribute("aria-hidden", "true");
+  cell.disabled = false;
   cell.appendChild(target);
 }
 
-// Handle clicking a can or obstacle
-function handleCellClick(cell) {
+// Check for milestone achievements
+function checkMilestone() {
+  const item = MILESTONES.find(m =>
+    m.score === score &&
+    m.score > lastMilestone
+  );
+
+  if (!item) return false;
+
+  lastMilestone = item.score;
+
+  say(item.message, "success");
+
+  return true;
+}
+
+// Handle clicking a target
+function collect(cell) {
   if (
-    !gameActive ||
-    (!cell.classList.contains("has-can") &&
-     !cell.classList.contains("has-obstacle"))
+    !active ||
+    (
+      !cell.classList.contains("has-can") &&
+      !cell.classList.contains("has-obstacle")
+    )
   ) {
     return;
   }
 
-  if (cell.classList.contains("has-obstacle")) {
-    currentCans = Math.max(0, currentCans - 2);
+  const hitDanger =
+    cell.classList.contains("has-obstacle");
 
-    showMessage(
-      "Oops! Pollution costs 2 points. Keep going!",
+  // Remove clicked target from the DOM
+  cell.replaceChildren();
+
+  cell.classList.remove(
+    "has-can",
+    "has-obstacle"
+  );
+
+  cell.disabled = true;
+
+  if (hitDanger) {
+    score = Math.max(0, score - 2);
+
+    say(
+      "Oops! Pollution costs 2 points. Watch out!",
       "warning"
     );
+
+    sound("obstacle");
+
   } else {
-    currentCans += 1;
+    score++;
 
-    if (currentCans > bestScore) {
-      bestScore = currentCans;
-    }
+    best = Math.max(best, score);
 
-    if (currentCans >= GOAL_CANS) {
-      currentCans = GOAL_CANS;
-      updateStats();
-      endGame(true);
+    sound("collect");
+
+    if (score >= GOAL) {
+      score = GOAL;
+
+      update();
+
+      finish(true);
+
       return;
     }
 
-    if ([5, 10, 15].includes(currentCans)) {
-      showMessage(
-        `Great work! ${currentCans} cans collected — you're making a splash!`,
-        "success"
-      );
-    } else {
-      showMessage("Nice catch! Every drop counts.", "success");
+    if (!checkMilestone()) {
+      say("Nice catch! Every drop counts.", "success");
     }
   }
 
-  updateStats();
-  spawnTarget();
+  update();
+
+  spawn();
 }
 
-// Start a new round
+// Start game
 function startGame() {
-  if (gameActive) return;
+  if (active) return;
 
-  currentCans = 0;
-  timeLeft = GAME_LENGTH;
-  gameActive = true;
+  score = 0;
 
-  confettiLayer.replaceChildren();
+  timeLeft = settings().time;
 
-  updateStats();
+  lastMilestone = 0;
+
+  active = true;
+
+  confetti.replaceChildren();
+
+  update();
+
   clearTargets();
 
-  startButton.disabled = true;
-  startButton.textContent = "Game in Progress…";
+  startBtn.disabled = true;
+  difficulty.disabled = true;
 
-  showMessage("Go! Tap yellow cans and avoid red pollution drops.");
+  startBtn.textContent = "Game in Progress…";
 
-  spawnTarget();
+  say(
+    "Go! Collect yellow cans and avoid red pollution drops!"
+  );
 
-  spawnInterval = setInterval(spawnTarget, 850);
+  sound("button");
 
-  countdownInterval = setInterval(() => {
+  spawn();
+
+  spawner = setInterval(
+    spawn,
+    settings().speed
+  );
+
+  countdown = setInterval(() => {
     timeLeft--;
-    updateStats();
+
+    update();
 
     if (timeLeft <= 0) {
-      endGame(false);
+      finish(false);
     }
+
   }, 1000);
 }
 
-// Stop the game and show the result
-function endGame(won) {
-  gameActive = false;
+// End game
+function finish(won) {
+  active = false;
 
-  clearInterval(countdownInterval);
-  clearInterval(spawnInterval);
+  clearInterval(countdown);
+  clearInterval(spawner);
 
-  countdownInterval = null;
-  spawnInterval = null;
+  countdown = null;
+  spawner = null;
 
   clearTargets();
 
-  startButton.disabled = false;
-  startButton.textContent = won ? "Play Again" : "Try Again";
+  startBtn.disabled = false;
+  difficulty.disabled = false;
+
+  startBtn.textContent =
+    won ? "Play Again" : "Try Again";
 
   if (won) {
-    showMessage(
+    say(
       "You did it! 20 cans collected — you're a Water Quest champion!",
       "success"
     );
 
-    launchConfetti();
+    sound("win");
+
+    celebrate();
+
   } else {
-    showMessage(
-      `Time's up! You collected ${currentCans} of ${GOAL_CANS} cans. Try again!`,
+    say(
+      `Time's up! You collected ${score} of ${GOAL} cans. Try again!`,
       "warning"
     );
   }
 
-  updateStats();
+  update();
 }
 
-// Reset everything to its initial state
+// Reset game
 function resetGame() {
-  gameActive = false;
+  active = false;
 
-  clearInterval(countdownInterval);
-  clearInterval(spawnInterval);
+  clearInterval(countdown);
+  clearInterval(spawner);
 
-  countdownInterval = null;
-  spawnInterval = null;
+  countdown = null;
+  spawner = null;
 
-  currentCans = 0;
-  timeLeft = GAME_LENGTH;
+  score = 0;
 
-  startButton.disabled = false;
-  startButton.textContent = "Start Game";
+  timeLeft = settings().time;
 
-  confettiLayer.replaceChildren();
+  lastMilestone = 0;
+
+  startBtn.disabled = false;
+  difficulty.disabled = false;
+
+  startBtn.textContent = "Start Game";
+
+  confetti.replaceChildren();
 
   clearTargets();
-  updateStats();
 
-  showMessage("Game reset. Ready for another quest?");
+  update();
+
+  say(
+    "Game reset. Choose your difficulty and start again!"
+  );
 }
 
-// Create a colorful confetti celebration
-function launchConfetti() {
+// Confetti celebration
+function celebrate() {
   const colors = [
     "#ffc907",
     "#2e9df7",
@@ -246,31 +443,53 @@ function launchConfetti() {
   ];
 
   for (let i = 0; i < 90; i++) {
-    const piece = document.createElement("span");
+    const bit = document.createElement("span");
 
-    piece.className = "confetti";
-    piece.style.left = `${Math.random() * 100}%`;
-    piece.style.backgroundColor =
+    bit.className = "confetti";
+
+    bit.style.left =
+      `${Math.random() * 100}%`;
+
+    bit.style.backgroundColor =
       colors[Math.floor(Math.random() * colors.length)];
 
-    piece.style.animationDelay = `${Math.random() * 1.2}s`;
+    bit.style.animationDelay =
+      `${Math.random() * 1.2}s`;
 
-    piece.style.setProperty(
+    bit.style.setProperty(
       "--drift",
       `${Math.random() * 160 - 80}px`
     );
 
-    confettiLayer.appendChild(piece);
+    confetti.appendChild(bit);
   }
 
   setTimeout(() => {
-    confettiLayer.replaceChildren();
+    confetti.replaceChildren();
   }, 3500);
 }
 
-// Connect the buttons and initialize the game
-startButton.addEventListener("click", startGame);
-resetButton.addEventListener("click", resetGame);
+// Button events
+startBtn.addEventListener("click", startGame);
 
+resetBtn.addEventListener("click", () => {
+  sound("button");
+  resetGame();
+});
+
+// Difficulty change
+difficulty.addEventListener("change", () => {
+  if (!active) {
+    timeLeft = settings().time;
+
+    timerEl.textContent = timeLeft;
+
+    say(
+      `${difficulty.options[difficulty.selectedIndex].text} selected. Ready to play?`
+    );
+  }
+});
+
+// Initialize game
 createGrid();
 resetGame();
